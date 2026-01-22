@@ -28,8 +28,6 @@ const generateRefreshAndAccessToken = async (userId) => {
     }
 }
 
-
-
 const registerUser = asyncHandler( async (req, res) => {
     // get user details from frontend
     // validation - not empty
@@ -194,6 +192,54 @@ const logOutUser = asyncHandler(async (req, res) => {
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
         .json(new ApiResponse(200, {}, "User logged out successfully"))
+})
+
+const refreshAccessToken = asyncHandler(async(req, res)=>{
+
+    // accessing incoming refreshToken from cookies and body by user to check with the generateAccessAndRefreshToken
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    // throw error
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "Unauthorized Access")
+    }
+
+    // do this shit in try catch to not get the error without knowing
+    try { 
+        // verify token using its secret and jwt
+        const deodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET,
+        )
+
+        // find user from decoded token
+        const user = await User.findById(decodedToken?._id)
+
+        if(!user){
+            throw new ApiError(401, "Invalid Refresh Token")
+        }
+
+        if(incomingRefreshToken != user?.refreshToken){
+            throw new ApiError(401, "Refresh Token is expired")
+        }   
+
+        // now generate new refreshToken
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        // call this shit from generateRefreshAndAccessToken
+        const {accessToken, newRefreshToken} = await generateRefreshAndAccessToken(user._id)
+
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(new ApiResponse(200, {newRefreshToken, accessToken}, "Access token refreshed successfully"))
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Access Token Error")
+    }
 })
 
 export {
