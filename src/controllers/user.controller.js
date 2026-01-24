@@ -195,6 +195,17 @@ const logOutUser = asyncHandler(async (req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async(req, res)=>{
+    // get incoming refresh token
+    // verify if it has by showing error
+
+    // add below shit in tryAndCatch
+    // verify the refreshToken with jwt and match it with the incoming refreshToken
+    // after getting refreshToken and verifying it, get the user details using _id
+    // couldnt find user, throw error
+    // if refreshToken dosent match with the user, throw error
+    // generate new accessToken and refreshToken with options
+    // call generateAccessToken to get new tokens
+    // return res with cookies and json response    
 
     // accessing incoming refreshToken from cookies and body by user to check with the generateAccessAndRefreshToken
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
@@ -208,8 +219,8 @@ const refreshAccessToken = asyncHandler(async(req, res)=>{
     try { 
         // verify token using its secret and jwt
         const deodedToken = jwt.verify(
-            incomingRefreshToken,
-            process.env.REFRESH_TOKEN_SECRET,
+            incomingRefreshToken,               // incoming token
+            process.env.REFRESH_TOKEN_SECRET,   // secret token to verify
         )
 
         // find user from decoded token
@@ -223,7 +234,7 @@ const refreshAccessToken = asyncHandler(async(req, res)=>{
             throw new ApiError(401, "Refresh Token is expired")
         }   
 
-        // now generate new refreshToken
+        // options is for
         const options = {
             httpOnly: true,
             secure: true
@@ -245,5 +256,6 @@ const refreshAccessToken = asyncHandler(async(req, res)=>{
 export {
     registerUser,
     loginUser,
-    logOutUser
+    logOutUser,
+    refreshAccessToken
 }
