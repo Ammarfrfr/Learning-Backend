@@ -175,7 +175,10 @@ const logOutUser = asyncHandler(async (req, res) => {
     User.findByIdAndUpdate(
         await req.user._id,
         {   // sets refreshToken undefined so the user can logout 
-            $set: {refreshToken: undefined}
+            $unset: {refreshToken: undefined}
+            // there is another way to unset {
+            //  use unset to unset whatever you want to unset for example here refreshtoken need s to be unsetted to refreshToken: 1
+            //}
         },
         {   // new values storing will be true
             new: true
@@ -256,21 +259,23 @@ const refreshAccessToken = asyncHandler(async(req, res)=>{
 
 const changeCurrentPassword = 
 asyncHandler( async (req, res) => {
-    const {oldPassword, newPassword, confirmPassword } = req.body
+    const {oldPassword, newPassword } = req.body
     
     
     const user = await User.findById(req.user?._id)
-    const isPasswordCorrect = await user.isPassword(oldPassword)
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
     if(!isPasswordCorrect){
         throw new ApiError(401, "The old password is incorrect")
     }
     
+    /*
     if(newPassword === confirmPassword){
         throw new ApiError(401, "The new password and the confirm Password is not same")
     }
+    */
 
-    user.password = newPassword
+    user.password = newPassword;
     await user.save({validateBeforeSave: false})
 
 
@@ -378,7 +383,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     const channel = await User.aggregate([
         {
             // match is used to filter documents
-            $match: {
+            $match: {   
                 username: username?.toLowerCase()
             }
         },
@@ -388,7 +393,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 from: "subscriptions",   // the database changes the first alphabet and makes it plural
                 localField: "_id",          // field from User collection
                 foreignField: "channel",    // field from Subscription collection
-                as: "subscibers"           // name of the array field to be added to the User documents
+                as: "subscribers"           // name of the array field to be added to the User documents
             }
         },
         {
@@ -408,7 +413,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                     $size: "$subscribers"       // size of the subscribers array
                 },
                 channelSubscribedToCount: {
-                    $size: "$subscriberTo"
+                    $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     // $cond is used to add conditional statements
@@ -426,6 +431,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             // project is used to select specific fields from the document and exclude others
             $project: {
                 fullName: 1,
+                email: 1,
                 subscriberCount: 1,
                 username: 1,
                 isSubscribed: 1,
@@ -453,8 +459,10 @@ const getUserWatchHistory = asyncHandler (async (req, res) => {
         {
             $match:{
                 // Find user by their ID
-                _id: mongoose.Types.ObjectId(req.user?._id)
+                _id: new mongoose.Types.ObjectId(req.user._id)
             },
+        },
+        {
             $lookup:{
                 from: "videos",
                 localField: "watchHistory",
@@ -488,14 +496,13 @@ const getUserWatchHistory = asyncHandler (async (req, res) => {
                     }
                 ]
             }
-
         }
     ])
 
     return res
     .status(200)
     .json(
-        new ApiResponse(200, user[0]?.watchHistory, "User watch history fetched successfully")
+        new ApiResponse(200, user[0].watchHistory, "User watch history fetched successfully")
     )
 })
 

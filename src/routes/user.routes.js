@@ -26,7 +26,7 @@ router.route("/login").post(loginUser)
 // secured routes
 router.route("/logout").post(verifyJwt, logOutUser)
 router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").post(verifyJwt, changeCurrentPassword)
+router.route("/change-password").patch(verifyJwt, changeCurrentPassword)
 router.route("/current-user").get(verifyJwt, getCurrentUser)
 router.route("/update-account-details").patch(verifyJwt, updateAccountDetails)
 
@@ -35,6 +35,5 @@ router.route("/update-cover-image").patch(verifyJwt, upload.single("coverImage")
 
 router.route("/c/:username").get(verifyJwt, getUserChannelProfile)
 router.route("/watch-history").get(verifyJwt, getUserWatchHistory)
-router.route("/get-user-profile").get(verifyJwt, getUserChannelProfile)
 
 export default router
