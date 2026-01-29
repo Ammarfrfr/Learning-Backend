@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 
-export const verifyJwt = asyncHandler( async (req, res, next) => {
+const verifyJWT = asyncHandler( async (req, res, next) => {
 
   try {
     // get token from cookies or headers (header means postman or frontend)
@@ -32,5 +32,5 @@ export const verifyJwt = asyncHandler( async (req, res, next) => {
   }
 })
 
-
+export { verifyJWT }
 // then go to routes
