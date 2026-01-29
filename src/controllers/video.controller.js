@@ -4,7 +4,7 @@ import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import {uploadOnCloudinary, deleteFromCloudinary} from "../utils/cloudinary.js"
 import { upload } from "../middlewares/multer.middleware.js"
 
 
@@ -55,6 +55,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
       description,
       videoFile: video.url,
       thumbnail: thumbnail.url,
+      thumbnailPublicId: thumbnail.public_id,
+      videoPublicId: video.public_id, // storing public_id to be able to delete the video from cloudinary later
       duration: video.duration,
       owner: req.user._id
     })
@@ -147,6 +149,34 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+    if(!videoId){
+      throw new ApiError(400, "Video id is not valid")
+    }
+    
+    const video = await Video.findById(videoId)
+    if(!video){
+      throw new ApiError(400, "Video wasn't found")
+    }
+    
+
+    // to delete from cloudinary
+    if (video.videoPublicId) { // assuming you stored public_id when uploading
+      await deleteFromCloudinary(video.videoPublicId, "video")
+    }
+
+    if(video.thumbnailPublicId){
+      await deleteFromCloudinary(video.thumbnailPublicId, "image")
+    }
+
+    // deletes video from file
+    const deletevideo = await Video.findByIdAndDelete(videoId)
+
+
+    return res
+    .status(200)
+    .json(
+      new ApiResponse(200, deletevideo, "Video deleted successfully")
+    )
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
