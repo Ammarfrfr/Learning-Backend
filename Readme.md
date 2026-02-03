@@ -38,6 +38,7 @@ VideoTube is a **MERN stack-based video sharing platform** inspired by YouTube, 
 
 ## Project Structure
 
+``` bash
 VideoTube/
 ├── backend
 │   ├── controllers
@@ -59,7 +60,7 @@ VideoTube/
 │   └── profile.png
 │
 └── README.md
-
+```
 
 ---
 
