@@ -42,25 +42,25 @@
 }
 
 .card-top {
-  position: relative
+  position: relative;
 }
 
 .card-select {
   position: absolute;
   left: 8px;
   top: 8px;
-  z-index: 2
+  z-index: 2;
 }
 
 .card-body {
-  padding: 8px 0
+  padding: 8px 0;
 }
 
 .card-footer {
   display: flex;
   gap: 8px;
   align-items: center;
-  justify-content: space-between
+  justify-content: space-between;
 }
 
 .card-edit {
@@ -68,7 +68,7 @@
   color: white;
   border: none;
   padding: 6px 8px;
-  border-radius: 6px
+  border-radius: 6px;
 }
 
 .card-actions {
@@ -92,7 +92,13 @@
   cursor: default;
 }
 
+.card-missing {
+  margin-top: 8px;
+  color: #a00;
+  font-size: 13px;
+}
+
 .card-error {
   color: red;
-  font-size: 12px
+  font-size: 12px;
 }

@@ -46,6 +46,10 @@ export default function VideoCard({ video, onDeleted, selectable = false, select
           </div>
         </Link>
       </div>
+      {/* show notice if video file URL missing */}
+      {!video.videoFile && (
+        <div className="card-missing">Video file URL missing — backend may not have returned the Cloudinary url</div>
+      )}
       <div className="card-footer">
         {isOwner && onEdit && (
           <button className="card-edit" onClick={() => onEdit(video)}>Edit</button>

@@ -63,7 +63,16 @@ export default function Video(){
           {video.videoFile ? (
             <video controls src={video.videoFile} className="video-player" />
           ) : (
-            <p>Video playback unavailable.</p>
+            <div className="video-missing">
+              <p>Video playback unavailable — the backend did not return a playable video URL.</p>
+              <p><strong>Diagnostics:</strong></p>
+              <ul>
+                <li>videoFile: {String(video.videoFile)}</li>
+                <li>videoPublicId: {String(video.videoPublicId)}</li>
+                <li>thumbnail: {String(video.thumbnail)}</li>
+              </ul>
+              <p>Please check the backend's Cloudinary upload response and ensure `secure_url`/`url` is stored in `videoFile`.</p>
+            </div>
           )}
           {/* If owner show delete button */}
           {user && (video.owner && ((video.owner._id && video.owner._id === user._id) || (video.owner === user._id) || (video.owner._id === user?._id))) && (

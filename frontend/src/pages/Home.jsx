@@ -25,7 +25,22 @@ export default function Home(){
           navigate('/my-videos')
         }
       } catch (err) {
-        setError(err?.response?.data?.message || err.message)
+        // show friendly message and attempt a fallback detailed fetch to help debugging
+        const msg = err?.response?.data?.message || err.message || String(err)
+        setError(msg)
+
+        // fallback: try calling the API directly with fetch and Authorization header (helps when CORS/cookies are the issue)
+        try {
+          const API_BASE = import.meta.env.VITE_API_URL
+          const token = localStorage.getItem('accessToken')
+          const fallbackRes = await fetch(`${API_BASE}/api/v1/videos?page=1&limit=50`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          })
+          const text = await fallbackRes.text()
+          console.debug('Fallback /videos response:', fallbackRes.status, text)
+        } catch (fallbackErr) {
+          console.debug('Fallback fetch failed', fallbackErr)
+        }
       } finally {
         setLoading(false)
       }
