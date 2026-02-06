@@ -25,6 +25,7 @@ const api = axios.create({
   withCredentials: false, // using Bearer token, not cookies
   headers: {
     "Content-Type": "application/json",
+    'ngrok-skip-browser-warning': 'true'
   },
 });
 
